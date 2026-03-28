@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "label"
+    },
+    {
+      "name": "reason_save_image",
+      "value": "用于将文稿拓印为图片保存至相册"
     }
   ]
 }

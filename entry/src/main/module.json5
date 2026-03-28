@@ -29,10 +29,45 @@
               "entity.system.home"
             ],
             "actions": [
-              "ohos.want.action.home"
+              "action.system.home",
+              "ohos.want.action.viewData"
+            ]
+          },
+          {
+            "actions": [
+              "ohos.want.action.viewData"
+            ],
+            "uris": [
+              {
+                "scheme": "file",
+                "type": "text/plain",
+                "utd": "general.markdown"
+              },
+              {
+                "scheme": "file",
+                "type": "text/markdown"
+              },
+              {
+                "scheme": "file",
+                "type": "application/octet-stream"
+              },
+              {
+                "scheme": "file",
+                "type": "*/*" // 终极兜底：只要是文件协议，就尝试唤起我的 App
+              }
             ]
           }
         ]
+      }
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.WRITE_IMAGEVIDEO",
+        "reason": "$string:reason_save_image", // 需要在 string.json 中定义原因，或者直接写字符串（如果编译器允许）
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when": "always"
+        }
       }
     ],
     "extensionAbilities": [
@@ -46,7 +81,7 @@
             "name": "ohos.extension.backup",
             "resource": "$profile:backup_config"
           }
-        ],
+        ]
       }
     ]
   }

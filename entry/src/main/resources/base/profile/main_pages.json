@@ -4,6 +4,7 @@
     "pages/Clean/CleanView",
     "pages/features/ExportPage",
     "pages/features/HistoryPage",
-    "pages/features/SharePage"
+    "pages/features/SharePage",
+    "pages/Editor/EditorPage"
   ]
 }

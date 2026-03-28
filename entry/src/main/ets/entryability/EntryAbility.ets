@@ -1,48 +1,64 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 
-const DOMAIN = 0x0000;
+interface StorageSchema {
+  externalUri: string;
+}
 
 export default class EntryAbility extends UIAbility {
+  private storage: LocalStorage = new LocalStorage({
+    'externalUri': ''
+  } as Record<string, string>);
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    console.info('MOXI_LOG: [Ability] onCreate 启动');
+    this.extractUri(want);
+
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {
-      hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
+      console.error('MOXI_LOG: [Ability] 设置颜色模式失败');
     }
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
   }
 
-  onDestroy(): void {
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onDestroy');
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    console.info('MOXI_LOG: [Ability] onNewWant 热启动 (后台唤起)');
+    this.extractUri(want);
+  }
+
+  private extractUri(want: Want): void {
+    console.info('MOXI_LOG: [Ability] Want数据全扫描: ' + JSON.stringify(want));
+
+    let uri = want.uri;
+
+    if (!uri && want.parameters) {
+      uri = want.parameters['key_uri'] as string || want.parameters['uri'] as string;
+    }
+
+    if (uri) {
+      console.info('MOXI_LOG: [Ability] 成功提取到有效 URI: ' + uri);
+      this.storage.setOrCreate('externalUri', uri);
+    } else {
+      console.warn('MOXI_LOG: [Ability] 未检出任何有效 URI 路径');
+    }
   }
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
-    // Main window is created, set main page for this ability
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
+    console.info('MOXI_LOG: [Ability] onWindowStageCreate 准备加载 Index');
 
-    windowStage.loadContent('pages/Index', (err) => {
+    const targetPage = 'pages/Index';
+
+    windowStage.loadContent(targetPage, this.storage, (err) => {
       if (err.code) {
-        hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
+        console.error(`MOXI_LOG: [Ability] 加载 Index 失败! Code: ${err.code}, Msg: ${err.message}`);
         return;
       }
-      hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
+      console.info('MOXI_LOG: [Ability] Index 页面加载成功，当前存储的 URI 为: ' + this.storage.get('externalUri'));
     });
   }
 
-  onWindowStageDestroy(): void {
-    // Main window is destroyed, release UI related resources
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');
-  }
-
-  onForeground(): void {
-    // Ability has brought to foreground
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onForeground');
-  }
-
-  onBackground(): void {
-    // Ability has back to background
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onBackground');
-  }
+  onWindowStageDestroy(): void { console.info('MOXI_LOG: [Ability] onWindowStageDestroy'); }
+  onForeground(): void { console.info('MOXI_LOG: [Ability] onForeground'); }
+  onBackground(): void { console.info('MOXI_LOG: [Ability] onBackground'); }
+  onDestroy(): void { console.info('MOXI_LOG: [Ability] onDestroy'); }
 }
